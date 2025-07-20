@@ -13,8 +13,8 @@ const fontSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Niggesh",
-  description: "For Niggas Who Need Doc",
+  title: "Healthcare App",
+  description: "A healthcare app built with Next.js and Appwrite",
 };
 
 export default function RootLayout({
