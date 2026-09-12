@@ -84,35 +84,35 @@ CarePulse eliminates manual paperwork and communication friction in clinical set
 
 ```mermaid
 flowchart TD
-    subgraph ClientLayer [Client Browser]
-        P[Patient User]
-        A[Admin Clinician]
+    subgraph ClientLayer ["Client Browser"]
+        P["Patient User"]
+        A["Admin Clinician"]
     end
 
-    subgraph NextJSLayer [Next.js 14 App Router Application]
-        subgraph ClientUI [Client Components]
-            HomeView["Home / PatientForm<br/><code>app/page.tsx</code>"]
-            RegisterView["RegisterForm<br/><code>app/patients/[userId]/register</code>"]
-            AppointmentView["AppointmentForm<br/><code>app/patients/[userId]/new-appointment</code>"]
-            AdminAuthModal["PasskeyModal (OTP)<br/><code>components/PasskeyModal.tsx</code>"]
-            AdminDashboard["Admin Dashboard & DataTable<br/><code>app/admin/page.tsx</code>"]
+    subgraph NextJSLayer ["Next.js 14 App Router Application"]
+        subgraph ClientUI ["Client Components"]
+            HomeView["Home / PatientForm<br/>app/page.tsx"]
+            RegisterView["RegisterForm<br/>app/patients/:userId/register"]
+            AppointmentView["AppointmentForm<br/>app/patients/:userId/new-appointment"]
+            AdminAuthModal["PasskeyModal (OTP)<br/>components/PasskeyModal.tsx"]
+            AdminDashboard["Admin Dashboard & DataTable<br/>app/admin/page.tsx"]
         end
 
-        subgraph ServerActions [Next.js Server Actions ('use server')]
-            ActionUser["createUser / getUser<br/><code>lib/actions/patient.action.ts</code>"]
-            ActionPatient["registerPatient<br/><code>lib/actions/patient.action.ts</code>"]
-            ActionAppt["createAppointment / updateAppointment<br/><code>lib/actions/appointment.action.ts</code>"]
-            ActionList["getRecentAppointmentList<br/><code>lib/actions/appointment.action.ts</code>"]
-            ActionSMS["sendSMSNotification<br/><code>lib/actions/appointment.action.ts</code>"]
+        subgraph ServerActions ["Next.js Server Actions"]
+            ActionUser["createUser / getUser<br/>lib/actions/patient.action.ts"]
+            ActionPatient["registerPatient<br/>lib/actions/patient.action.ts"]
+            ActionAppt["createAppointment / updateAppointment<br/>lib/actions/appointment.action.ts"]
+            ActionList["getRecentAppointmentList<br/>lib/actions/appointment.action.ts"]
+            ActionSMS["sendSMSNotification<br/>lib/actions/appointment.action.ts"]
         end
 
-        subgraph Monitoring [Sentry Telemetry]
-            SentryClient["Client Instrumentation<br/><code>instrumentation-client.ts</code>"]
-            SentryServer["Server Instrumentation<br/><code>instrumentation.ts</code>"]
+        subgraph Monitoring ["Sentry Telemetry"]
+            SentryClient["Client Instrumentation<br/>instrumentation-client.ts"]
+            SentryServer["Server Instrumentation<br/>instrumentation.ts"]
         end
     end
 
-    subgraph AppwriteBaaS [Appwrite Cloud / Self-Hosted Backend]
+    subgraph AppwriteBaaS ["Appwrite Cloud / Self-Hosted Backend"]
         AppwriteUsers[("Appwrite Users API<br/>Authentication & Profiles")]
         AppwriteDB[("Appwrite Databases<br/>Patients & Appointments")]
         AppwriteStorage[("Appwrite Storage<br/>Identification Bucket")]
@@ -134,15 +134,15 @@ flowchart TD
     ActionAppt -->|Create Appointment Document| AppwriteDB
 
     %% Admin Flow
-    A -->|1. Access /?admin=true with Passkey| AdminAuthModal
+    A -->|1. Authenticate via OTP Passkey| AdminAuthModal
     AdminAuthModal -->|Store Encrypted Key & Redirect| AdminDashboard
     AdminDashboard -->|Fetch Aggregates & List| ActionList
     ActionList -->|Query Descending CreatedAt| AppwriteDB
-    AdminDashboard -->|2. Schedule / Cancel Action| ActionAppt
+    AdminDashboard -->|2. Schedule or Cancel Action| ActionAppt
     ActionAppt -->|Update Document Status| AppwriteDB
     ActionAppt -->|Trigger Notification| ActionSMS
     ActionSMS -->|Send SMS to Patient| AppwriteMessaging
-    ActionAppt -->|Cache Invalidation: revalidatePath| AdminDashboard
+    ActionAppt -->|Cache Invalidation via revalidatePath| AdminDashboard
 
     %% Monitoring Links
     ClientUI -.-> SentryClient
